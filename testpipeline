@@ -35,8 +35,9 @@ pipeline {
                 sh 'pwd'
                 ansiblePlaybook( 
                     playbook: 'playbook.yml',
-                    inventory: 'path/to/inventory.ini')
+                    inventory: 'site.yml')
             }
         }
     }
 }
+

@@ -13,7 +13,7 @@ pipeline {
             agent { docker { image 'python:3' } }
             steps {
                 echo 'Testing..'
-                sh 'uname -a' 
+                sh 'pwd' 
 		sh 'python test.py'
             }
         }

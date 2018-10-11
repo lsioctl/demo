@@ -1,10 +1,12 @@
 pipeline {
-    agent any 
+    agent {
+        label 'master'
+    } 
     stages {
         stage('Build') {
             steps {
                 echo 'Building..'
-                sh 'uname -a' 
+                sh 'pwd' 
             }
         }
         stage('Test') {
@@ -18,7 +20,7 @@ pipeline {
         stage('Deploy') {
             steps {
                 echo 'Deploying....'
-                sh 'uname -a' 
+                sh 'pwd' 
             }
         }
     }

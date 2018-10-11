@@ -1,0 +1,42 @@
+pipeline {
+    agent {
+        label 'master'
+    }
+    stages {
+        // this is automatically done when pipeline from scm
+        stage ('git'){
+            steps {
+                checkout([$class: 'GitSCM', branches: [[name: '*/master']],
+                userRemoteConfigs: [[url: 'http://github.com/lsioctl/demo.git']]])
+            }
+        }
+        stage('Build') {
+            steps {
+                echo 'Building..'
+                sh 'pwd'
+                sh 'ls'
+            }
+        }
+        stage('Test') {
+            agent { docker { image 'python:3' } }
+            steps {
+                // this is automatically done when pipeline from scm
+                checkout([$class: 'GitSCM', branches: [[name: '*/master']],
+                userRemoteConfigs: [[url: 'http://github.com/lsioctl/demo.git']]])
+                echo 'Testing..'
+                sh 'pwd'
+                sh 'ls'
+                sh 'python test.py'
+            }
+        }
+        stage('Deploy') {
+            steps {
+                echo 'Deploying....'
+                sh 'pwd'
+                ansiblePlaybook( 
+                    playbook: 'playbook.yml',
+                    inventory: 'path/to/inventory.ini')
+            }
+        }
+    }
+}

@@ -3,13 +3,6 @@ pipeline {
         label 'master'
     }
     stages {
-        // this is automatically done when pipeline from scm
-        stage ('git'){
-            steps {
-                checkout([$class: 'GitSCM', branches: [[name: '*/master']],
-                userRemoteConfigs: [[url: 'http://github.com/lsioctl/demo.git']]])
-            }
-        }
         stage('Build') {
             steps {
                 echo 'Building..'
@@ -22,6 +15,8 @@ pipeline {
             agent { docker { image "lsioctl/myapp:${env.BUILD_NUMBER}" } }
             steps {
                 echo 'Testing..'
+                sh 'pwd'
+                sh 'ls'
                 sh 'python test.py'
             }
         }

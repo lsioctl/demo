@@ -6,3 +6,10 @@ all:
       vars:
         ansible_connection: local
         ansible_python_interpreter: "{{ansible_playbook_python}}"
+    cicdinfra_nginx_1:
+      hosts:
+        cicdinfra_nginx_1 
+      vars:
+        ansible_connection: docker
+        ansible_user: root
+

@@ -17,7 +17,7 @@ pipeline {
                 echo 'Testing..'
                 sh 'pwd'
                 sh 'ls'
-                sh 'python test.py'
+                sh 'cd /app; python test.py'
             }
         }
         stage('Deploy') {

@@ -11,6 +11,14 @@ pipeline {
                 sh "docker build -t lsioctl/myapp:${env.BUILD_NUMBER} ."
             }
         }
+        stage('JavaBuild') {
+            agent { docker { image 'maven:3-alpine' } }
+            steps {
+                echo 'Building..'
+                sh 'pwd'
+                sh 'mvn --version'
+            }
+        }
         stage('Test') {
             agent { docker { image "lsioctl/myapp:${env.BUILD_NUMBER}" } }
             steps {

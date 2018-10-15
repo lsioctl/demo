@@ -6,7 +6,7 @@ all:
       vars:
         ansible_connection: local
         ansible_python_interpreter: "{{ansible_playbook_python}}"
-    cicdinfra_nginx_1:
+    cicdinfra_nginx:
       hosts:
         cicdinfra_nginx_1 
       vars:

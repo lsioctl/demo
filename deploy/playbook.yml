@@ -7,28 +7,23 @@
     repo_version: master
     webapps_dir: /app
   tasks:
-  #- name: static nginx configuration. B/G will come a day ...
-  #  nginx image misses python ...
-  #  delegate_to: cicdinfra_nginx_1
-  #  copy:
-  #    src: nginx.conf
-  #    dest: /etc/nginx/conf.d/default.conf
 
-  - name: stop current prod container.
-    command: docker stop prod ; docker rm prod
+  - name: test if Swarm service exists
+    shell: docker service ls | grep prod
+    register: result
     ignore_errors: yes
 
-  - name: create future prod container
-    docker_container:
-      name: prod 
-      image: lsioctl/myapp:latest
-      published_ports: 8082:80
-      volumes: prod-data:/var/data
-  
-  - name: add container to inventory
-    add_host:
-      name: prod 
-      ansible_connection: docker
-      ansible_user: root 
-    changed_when: false
-  
+  - name: initialize the Swarm service
+    # we ensure the order is start first
+    # note: on experimental docker deploy
+    # but not in docker stack deploy
+    # https://github.com/docker/cli/pull/360#ref-issue-257454385
+    command: > 
+      docker service create
+      --name prod -p 8080:80 --replicas 1 
+      --update-delay 10s --update-order start-first 
+      lsioctl/myapp
+    when: result is failed
+
+  - name: rolling update of the application
+    command: docker service update --image lsioctl/myapp prod 

@@ -30,4 +30,6 @@
     when: result is failed
 
   - name: rolling update of the application
-    command: docker service update --image lsioctl/myapp:latest prod 
+    # without the --force, or a specific tag, lastest is not deployed
+    # https://stackoverflow.com/questions/38937102/docker-swarm-service-force-update-of-latest-image-already-running
+    command: docker service update --force --image lsioctl/myapp:latest prod 

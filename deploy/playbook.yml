@@ -30,4 +30,4 @@
     when: result is failed
 
   - name: rolling update of the application
-    command: docker service update --image lsioctl/myapp prod 
+    command: docker service update --image lsioctl/myapp:latest prod 

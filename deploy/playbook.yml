@@ -18,10 +18,14 @@
     # note: on experimental docker deploy
     # but not in docker stack deploy
     # https://github.com/docker/cli/pull/360#ref-issue-257454385
+    # note: only local volume by default for swarm
+    # ok for the mockup where we have one host
+    # see: https://blog.octo.com/en/kubernetes-vs-swarm-volumes/
     command: > 
       docker service create
-      --name prod -p 8080:80 --replicas 1 
+      --name prod -p 8082:80 --replicas 1 
       --update-delay 10s --update-order start-first 
+      --mount type=volume,source=prod,destination=/var/data
       lsioctl/myapp
     when: result is failed
 

@@ -1,5 +1,11 @@
 - name: run the playbook tasks on the localhost
   hosts: local
+  vars:
+    app_name: demo
+    repo_url: https://github.com/lsioctl/demo
+    repo_remote: origin
+    repo_version: master
+    webapps_dir: /app
   tasks:
 
   - name: test if Swarm service exists

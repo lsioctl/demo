@@ -4,7 +4,7 @@
     - role: ansible-bluegreen-docker
       vars:
         app_repo: "lsioctl/{{ app_name }}"
-        app_name: "myapp"
+        app_name: "myapp2"
         app_port: 80
         app_network: "cicdinfra_front"
         app_check_health: False

@@ -7,4 +7,6 @@
         app_name: "myapp2"
         app_port: 80
         app_network: "cicdinfra_front"
-        app_check_health: False
+        # uncomment for local ansible tests
+        # as we need access to docker network
+        # app_check_health: False

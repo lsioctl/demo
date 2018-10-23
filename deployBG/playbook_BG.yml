@@ -1,9 +1,0 @@
-- name: run the playbook tasks on the localhost
-  hosts: local
-  roles:
-    - role: ansible-bluegreen-docker
-      vars:
-        app_repo: "lsioctl/{{ app_name }}"
-        app_name: "myapp"
-        app_port: 80
-        app_check_health: False

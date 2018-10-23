@@ -1,35 +1,9 @@
 - name: run the playbook tasks on the localhost
   hosts: local
-  vars:
-    app_name: demo
-    repo_url: https://github.com/lsioctl/demo
-    repo_remote: origin
-    repo_version: master
-    webapps_dir: /app
-  tasks:
-
-  - name: test if Swarm service exists
-    shell: docker service ls | grep prod
-    register: result
-    ignore_errors: yes
-
-  - name: initialize the Swarm service
-    # we ensure the order is start first
-    # note: on experimental docker deploy
-    # but not in docker stack deploy
-    # https://github.com/docker/cli/pull/360#ref-issue-257454385
-    # note: only local volume by default for swarm
-    # ok for the mockup where we have one host
-    # see: https://blog.octo.com/en/kubernetes-vs-swarm-volumes/
-    command: > 
-      docker service create
-      --name prod -p 8082:80 --replicas 1 
-      --update-delay 10s --update-order start-first 
-      --mount type=volume,source=prod,destination=/var/data
-      lsioctl/myapp
-    when: result is failed
-
-  - name: rolling update of the application
-    # without the --force, or a specific tag, lastest is not deployed
-    # https://stackoverflow.com/questions/38937102/docker-swarm-service-force-update-of-latest-image-already-running
-    command: docker service update --force --image lsioctl/myapp:latest prod 
+  roles:
+    - role: ansible-bluegreen-docker
+      vars:
+        app_repo: "lsioctl/{{ app_name }}"
+        app_name: "myapp"
+        app_port: 80
+        app_check_health: False

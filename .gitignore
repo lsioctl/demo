@@ -16,3 +16,5 @@ ENV/
 *.swp
 .idea
 
+### ansible stuff
+deployBG/facts.d

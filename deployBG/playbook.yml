@@ -6,4 +6,5 @@
         app_repo: "lsioctl/{{ app_name }}"
         app_name: "myapp"
         app_port: 80
-        #app_check_health: False
+        app_network: "cicdinfra_front"
+        app_check_health: False

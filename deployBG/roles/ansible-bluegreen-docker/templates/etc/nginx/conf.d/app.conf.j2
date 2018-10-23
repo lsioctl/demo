@@ -5,12 +5,8 @@ upstream {{ app_nginx_upstream }} {
     ip_hash;
     {% endif %}
 
-    {% for port in app_ports -%}
-    {% for k,v in port.iteritems() -%}
-    {% if v -%}
-    server {% if v[0].HostIp == "0.0.0.0" -%}{{ ansible_default_ipv4.address }}{% else -%}{{ v[0].HostIp }}{% endif %}:{{ v[0].HostPort }};
-    {% endif %}
-    {% endfor %}
+    {% for host in app_hostnames -%}
+    server {{ host }}:{{ app_port}};
     {% endfor %}
 }
 

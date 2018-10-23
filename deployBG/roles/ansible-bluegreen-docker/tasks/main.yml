@@ -58,6 +58,8 @@
         log_options: "{{ app_log_options }}"
         env: "{{ app_env }}"
         volumes: "{{ app_volumes }}"
+        networks:
+          - name: "{{ app_network }}"
       with_sequence: count={{ app_instances_count }}
       check_mode: "{{ app_check_mode }}"
       register: deploy
@@ -71,27 +73,24 @@
       fail:
         msg: "Something went wrong!"
 
-- name: detect app ports
+- name: detect app hostnames
   set_fact:
-    app_ports: "{{ deploy.results| map(attribute='ansible_facts.docker_container.HostConfig.PortBindings')| list }}"
+    app_hostnames: "{{ deploy.results| map(attribute='ansible_facts.docker_container.Config.Hostname')| list }}"
   tags:
     - app:deploy
 
 - debug:
-    var: app_ports
-
-- debug:
-    var: app_ports[0]['80/tcp']
+    var: app_hostnames
 
 - name: app health check
   uri:
     # yamllint disable-line rule:line-length
-    url: "http://{% if item.values()[0][0].HostIp == '0.0.0.0' %}127.0.0.1{% else %}{{ item.values()[0][0].HostIp }}{% endif %}:{{ item.values()[0][0].HostPort }}{{ app_health_check_path }}"
+    url: "http://{{ item }}:{{ app_port}}{{ app_health_check_path }}"
     method: GET
     status_code: 200
   when: app_check_health
   with_items:
-    - "{{ app_ports }}"
+    - "{{ app_hostnames }}"
   tags:
     - app:deploy
 

@@ -1,7 +1,7 @@
 ---
 - name: store host facts
   blockinfile:
-    dest: /etc/ansible/facts.d/{{ app_name }}.fact
+    dest: facts.d/{{ app_name }}.fact
     create: yes
     block: |
       [{{ app_name }}]

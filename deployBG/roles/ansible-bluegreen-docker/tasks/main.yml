@@ -2,14 +2,14 @@
 
 - name: ensure facts.d dir exists
   file:
-    path: /etc/ansible/facts.d
+    path: ./facts.d
     state: directory
   tags:
     - common:facts
 
 - name: put dummy fact to local facts dir
   lineinfile:
-    dest: /etc/ansible/facts.d/dummy.fact
+    dest: ./facts.d/dummy.fact
     line: '{ "fact": true }'
     regexp: '^{ "fact": true }'
     create: yes
@@ -73,14 +73,22 @@
 
 - name: detect app ports
   set_fact:
-    app_ports: "{{ deploy.results| map(attribute='ansible_facts.docker_container.NetworkSettings.Ports')| list }}"
+    app_ports: "{{ deploy.results| map(attribute='ansible_facts.docker_container.HostConfig.PortBindings')| list }}"
   tags:
     - app:deploy
+
+- debug:
+    var: app_ports
+
+- debug:
+    var: app_ports[0]['80/tcp']
 
 - name: app health check
   uri:
     # yamllint disable-line rule:line-length
-    url: "http://{% if item.values()[0][0].HostIp == '0.0.0.0' %}127.0.0.1{% else %}{{ item.values()[0][0].HostIp }}{% endif %}:{{ item.values()[0][0].HostPort }}{{ app_health_check_path }}"
+    # this hack is really ugly, I have to find something else
+    #url: "http://127.0.0.1:{{ item.values()[0][0].HostPort }}{{ app_health_check_path }}"
+    url: "http://127.0.0.1:{{ app_ports[0]['80/tcp'][0]['HostPort'] }}{{ app_health_check_path }}"
     method: GET
     status_code: 200
   when: app_check_health
@@ -90,9 +98,10 @@
     - app:deploy
 
 - name: generate nginx config for app
+  delegate_to: cicdinfra_nginx_1
   template:
     src: etc/nginx/conf.d/app.conf.j2
-    dest: "/etc/nginx/conf.d/{{ app_name }}.conf"
+    dest: "/etc/nginx/conf.d/default.conf"
     backup: yes
   when: app_balancing
   register: _nginx_config

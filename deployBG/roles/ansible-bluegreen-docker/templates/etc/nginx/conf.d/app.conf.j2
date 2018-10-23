@@ -5,13 +5,11 @@ upstream {{ app_nginx_upstream }} {
     ip_hash;
     {% endif %}
 
-    {% for host in groups[app_group] -%}
-    {% for port in hostvars[host]['app_ports'] -%}
+    {% for port in app_ports -%}
     {% for k,v in port.iteritems() -%}
     {% if v -%}
-        server {% if v[0].HostIp == "0.0.0.0" -%}{{ hostvars[host]['ansible_default_ipv4']['address']  }}{% else -%}{{ v[0].HostIp  }}{% endif %}:{{ v[0].HostPort  }};
+    server {% if v[0].HostIp == "0.0.0.0" -%}{{ ansible_default_ipv4.address }}{% else -%}{{ v[0].HostIp }}{% endif %}:{{ v[0].HostPort }};
     {% endif %}
-    {% endfor %}
     {% endfor %}
     {% endfor %}
 }
@@ -36,8 +34,8 @@ server {
 
         proxy_pass                http://{{ app_nginx_upstream }} ;
 
-        access_log                /var/log/nginx/{{ app_name }}.access.log;
-        error_log                 /var/log/nginx/{{ app_name }}.error.log;
+        access_log                /var/log/nginx/access.log;
+        error_log                 /var/log/nginx/error.log;
 
     }
 

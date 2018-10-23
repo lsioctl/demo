@@ -23,8 +23,8 @@ pipeline {
         stage('Deploy') {
             steps {
                 echo 'Deploying....'
-                sh "docker tag lsioctl/myapp:${env.BUILD_NUMBER} lsioctl/myapp2:latest"
-                ansiblePlaybook( 
+                sh "docker tag lsioctl/myapp2:${env.BUILD_NUMBER} lsioctl/myapp2:latest"
+                ansiblePlaybook(
                     playbook: 'deployBG/playbook.yml',
                     inventory: 'deployBG/site.yml')
             }

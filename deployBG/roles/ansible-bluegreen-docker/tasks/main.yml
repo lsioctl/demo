@@ -88,7 +88,7 @@
     method: GET
     status_code: 200
   register: healthresult
-  until: '"Hello World" in healthresult.content'
+  until: healthresult.status == 200
   retries: 10
   delay: 1
   when: app_check_health

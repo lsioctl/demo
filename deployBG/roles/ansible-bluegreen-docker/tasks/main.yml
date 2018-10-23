@@ -73,7 +73,7 @@
       fail:
         msg: "Something went wrong!"
 
-- name: detect app hostnames
+- name: detect app container hostnames
   set_fact:
     app_hostnames: "{{ deploy.results| map(attribute='ansible_facts.docker_container.Config.Hostname')| list }}"
   tags:
@@ -84,10 +84,13 @@
 
 - name: app health check
   uri:
-    # yamllint disable-line rule:line-length
     url: "http://{{ item }}:{{ app_port}}{{ app_health_check_path }}"
     method: GET
     status_code: 200
+  register: healthresult
+  until: '"Hello World" in healthresult.content'
+  retries: 10
+  delay: 1
   when: app_check_health
   with_items:
     - "{{ app_hostnames }}"

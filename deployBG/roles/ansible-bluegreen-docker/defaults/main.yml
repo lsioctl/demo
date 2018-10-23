@@ -1,0 +1,37 @@
+---
+app_bluegreen: True
+app_balancing: True
+
+app_group: all
+
+app_name: trainingwheels
+app_repo:
+app_nginx_upstream: "{{ app_name }}"
+app_nginx_ip_hash: False
+app_nginx_port: 80
+app_port: 5000
+app_version: latest
+app_instances_count: 2
+app_stop_inactive_color: True
+
+app_check_health: True
+app_health_check_path: "/"
+app_hostname: localhost
+
+app_command: ""
+app_etc_hosts: {}
+app_env: {}
+app_volumes: []
+app_log_driver: none
+app_log_options:
+
+app_port_prefix: 401
+app_port_prefix_blue: 402
+app_port_prefix_green: 407
+
+app_first_run: false
+app_check_mode: false
+
+app_default_color: green
+
+# vim: set et fenc= ft=ansible sts=2 sw=2 ts=2 tw=0 :

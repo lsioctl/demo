@@ -1,0 +1,111 @@
+---
+
+- name: ensure facts.d dir exists
+  file:
+    path: /etc/ansible/facts.d
+    state: directory
+  tags:
+    - common:facts
+
+- name: put dummy fact to local facts dir
+  lineinfile:
+    dest: /etc/ansible/facts.d/dummy.fact
+    line: '{ "fact": true }'
+    regexp: '^{ "fact": true }'
+    create: yes
+    state: present
+  tags:
+    - common:facts
+
+- name: reread ansible_local facts
+  setup:
+    filter: ansible_local
+
+- name: do blue/green logic
+  include: pre_tasks.yml
+  when: app_bluegreen
+
+- name: cleanup dead containers workaround
+  include: cleanup_dead_containers.yml
+
+- name: inform about current deployment
+  debug:
+    msg:
+      - "DEPLOYING {{ app_name }}!"
+      - "{% if app_bluegreen %}Color of this deploy is {{ _next_color | upper }}.{% endif %}"
+      - "Version is {{ app_version }}"
+  run_once: yes
+  delegate_to: localhost
+  tags:
+    - app:info
+    - app:deploy
+
+- block:
+    - name: debug port_prefix value
+      debug:
+        var: app_port_prefix
+
+    - name: deploy app
+      docker_container:
+        name: "{{ app_name }}{% if app_bluegreen %}_{{ _next_color }}{% endif %}_{{ item }}"
+        state: started
+        ports: "{{ app_port_prefix }}{{ item  }}:{{ app_port }}"
+        image: "{{ app_repo | d(app_name) }}:{{ app_version }}"
+        command: "{{ app_command }}"
+        restart_policy: unless-stopped
+        etc_hosts: "{{ app_etc_hosts }}"
+        log_driver: "{{ app_log_driver }}"
+        log_options: "{{ app_log_options }}"
+        env: "{{ app_env }}"
+        volumes: "{{ app_volumes }}"
+      with_sequence: count={{ app_instances_count }}
+      check_mode: "{{ app_check_mode }}"
+      register: deploy
+      tags:
+        - app:deploy
+  rescue:
+    - name: cleanup dead containers workaround
+      include: cleanup_dead_containers.yml
+
+    - name: fail play, cause something went wrong
+      fail:
+        msg: "Something went wrong!"
+
+- name: detect app ports
+  set_fact:
+    app_ports: "{{ deploy.results| map(attribute='ansible_facts.docker_container.NetworkSettings.Ports')| list }}"
+  tags:
+    - app:deploy
+
+- name: app health check
+  uri:
+    # yamllint disable-line rule:line-length
+    url: "http://{% if item.values()[0][0].HostIp == '0.0.0.0' %}127.0.0.1{% else %}{{ item.values()[0][0].HostIp }}{% endif %}:{{ item.values()[0][0].HostPort }}{{ app_health_check_path }}"
+    method: GET
+    status_code: 200
+  when: app_check_health
+  with_items:
+    - "{{ app_ports }}"
+  tags:
+    - app:deploy
+
+- name: generate nginx config for app
+  template:
+    src: etc/nginx/conf.d/app.conf.j2
+    dest: "/etc/nginx/conf.d/{{ app_name }}.conf"
+    backup: yes
+  when: app_balancing
+  register: _nginx_config
+  notify:
+    - check nginx configuration
+    - reload nginx
+    - make test request
+  tags:
+    - app:nginx
+
+- name: fire handlers
+  meta: flush_handlers
+
+- name: do blue/green logic
+  include: post_tasks.yml
+  when: app_bluegreen

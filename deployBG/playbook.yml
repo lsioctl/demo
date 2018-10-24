@@ -9,4 +9,4 @@
         app_network: "cicdinfra_front"
         # uncomment for local ansible tests
         # as we need access to docker network
-        app_check_health: False
+        #app_check_health: False

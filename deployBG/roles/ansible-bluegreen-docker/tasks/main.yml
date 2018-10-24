@@ -116,7 +116,7 @@
   notify:
     - check nginx configuration
     - reload nginx
-    - make test request
+    #- make test request
   tags:
     - app:nginx
 

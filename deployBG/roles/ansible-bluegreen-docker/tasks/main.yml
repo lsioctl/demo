@@ -20,6 +20,14 @@
 - name: reread ansible_local facts
   setup:
     filter: ansible_local
+    fact_path: ./facts.d
+  tags:
+    - common:facts
+
+- debug:
+    var: ansible_local
+  tags:
+    - common:facts
 
 - name: do blue/green logic
   include: pre_tasks.yml

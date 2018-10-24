@@ -21,7 +21,8 @@
   ignore_errors: yes
   when:
     - not app_first_run
-    - app_version != _current_version
+    # really have to work with latest
+    #- app_version != _current_version
     - app_stop_inactive_color
   tags:
     - skip_ansible_lint

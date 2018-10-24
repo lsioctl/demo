@@ -40,12 +40,13 @@
     _next_color: "green"
   when: _current_color == "blue"
 
-- name: don't change color if deploying same version
-  set_fact:
-    _next_color: "{{ _current_color }}"
-  when:
-    - not app_first_run
-    - _current_version == app_version
+# TODO: as for swarm, do not work with default version
+# - name: don't change color if deploying same version
+#   set_fact:
+#     _next_color: "{{ _current_color }}"
+#   when:
+#     - not app_first_run
+#     - _current_version == app_version
 
 - name: set port_prefix for blue
   set_fact:
